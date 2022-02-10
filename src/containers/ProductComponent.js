@@ -9,8 +9,6 @@ const ProductComponent = () => {
     const { id, title, image, price, category } = product;
     return (
       <div className="col-md-4 col-lg-3 col-6">
-
-   
 <div class="card m-3 d-flex align-items-stretch" style={{width: "18rem" ,height:"30rem"}}>
   <div style={{width:"100%",height:"55%"}}>
 

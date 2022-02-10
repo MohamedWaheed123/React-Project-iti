@@ -1,25 +1,41 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import {AddProduct} from "../redux/actions/cartActions";
 import {
   selectedProduct,
   removeSelectedProduct,
 } from "../redux/actions/productsActions";
+import { useHistory } from "react-router-dom";
 const ProductDetails = () => {
+  let userdata=JSON.parse(localStorage.getItem("userInfo"))
+  let history=useHistory()
   const { productId } = useParams();
   let product = useSelector((state) => state.product);
-  const { image, title, price, category, description } = product;
+  const { image, title, price, category, description,quantity,status } = product;
+  let [qty,Setqty]=useState(0)
   const dispatch = useDispatch();
   const fetchProductDetail = async (id) => {
-    const response = await axios
-      .get(`http://localhost:3000/products/${id}`)
-      .catch((err) => {
-        console.log("Err: ", err);
-      });
-    dispatch(selectedProduct(response.data));
+ if(localStorage.getItem("userInfo")){
+  const response = await axios
+  .get(`http://localhost:3000/products/${id}`)
+  .catch((err) => {
+    console.log("Err: ", err);
+  });
+dispatch(selectedProduct(response.data));
+ }else{
+  history.push("/login")
+ }
   };
-
+const addintocart=()=>{
+  if(userdata.useremail){
+    dispatch(AddProduct({user:userdata.useremail,cartitems:{id:productId,image,price,qty,title}}))
+  }else{
+    alert("login first")
+    history.push("/login")
+  }
+}
   useEffect(() => {
     if (productId && productId !== "") fetchProductDetail(productId);
     return () => {
@@ -33,7 +49,50 @@ const ProductDetails = () => {
     ) : (
 
 <div class="row shadowDiv m-auto   " >
-     <div class="col-md-7 col-12">
+<div className="row d-flex justify-content-between">
+  <div className="col-5 ">
+  <img src={image} 
+       class="img-fluid" alt=""/>
+  </div>
+  <div className="col-3 ">
+      <h2 >{title}</h2>
+      <hr/>
+      <span>Description:{description}</span>
+      <hr/>
+      <span>Price: ${price}</span>
+  </div> 
+  <div className="col-3">
+  <ul class="list-group">
+  <li class="list-group-item">Price:${price}</li>
+  <li class="list-group-item">status:{status}</li>
+  <li class="list-group-item">
+    qty:
+  <select className="custom-select" value={qty} onChange={(e)=>{Setqty(e.target.value)}}>
+     
+    {
+      [...Array(quantity).keys()].map((x) => {
+         return(
+          <option key={x + 1} value={x + 1} >
+               {x + 1}
+        </option>
+          )
+      })
+      }
+  </select>
+    </li>
+    <li class="list-group-item">
+      <button className="btn btn-primary" onClick={()=>{
+           addintocart()
+        }}>add to cart</button>
+    </li>
+
+
+  </ul>
+  </div>
+
+
+</div>
+     {/* <div class="col-md-7 col-12">
        <img src={image} 
        class="img-fluid w-50" alt=""/>
      </div>
@@ -45,7 +104,7 @@ const ProductDetails = () => {
          <p class="m-3">{description}</p>
          <button className="btn btn-primary"> Add To Cart</button>
             
- </div>
+ </div> */}
  </div>
 
     
